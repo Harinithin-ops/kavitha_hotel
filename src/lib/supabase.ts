@@ -42,6 +42,9 @@ export type EventBookingInsert = {
  * Returns true on success.
  */
 export async function saveUser(data: UserInsert): Promise<boolean> {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error("Missing Supabase configuration in deployment environment variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY).")
+  }
   try {
     const { error } = await supabase.from("users").insert({
       name:   data.name,
@@ -53,12 +56,12 @@ export async function saveUser(data: UserInsert): Promise<boolean> {
     // Ignore duplicate email errors since we just want to ensure they exist
     if (error && error.code !== "23505") {
       console.error("[Supabase] saveUser error:", error.message)
-      return false
+      throw new Error(error.message)
     }
     return true
   } catch (err) {
     console.error("[Supabase] saveUser exception:", err)
-    return false
+    throw err
   }
 }
 
@@ -69,15 +72,18 @@ export async function saveUser(data: UserInsert): Promise<boolean> {
  * Returns true on success.
  */
 export async function saveEventBooking(data: EventBookingInsert): Promise<boolean> {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error("Missing Supabase configuration in deployment environment variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY).")
+  }
   try {
     const { error } = await supabase.from("event_bookings").insert([data])
     if (error) {
       console.error("[Supabase] saveEventBooking error:", error.message)
-      return false
+      throw new Error(error.message)
     }
     return true
   } catch (err) {
     console.error("[Supabase] saveEventBooking exception:", err)
-    return false
+    throw err
   }
 }
